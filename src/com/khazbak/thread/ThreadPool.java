@@ -3,17 +3,33 @@ package com.khazbak.thread;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.function.Consumer;
 
 public class ThreadPool {
     ExecutorService executor= Executors.newCachedThreadPool();
+    Consumer<IO_Port> consumer;
 
-    public Future<Long> arraySum(int[] array,int leftIndex,int rightIndex){
+    public ThreadPool(Consumer<IO_Port> consumer) {
+        this.consumer = consumer;
+    }
+
+    public Future<Long> arraySum(IO_Port port){
         return executor.submit(() -> {
-            long sum=0;
-            for (int i = leftIndex; i < rightIndex; i++) {
-                sum+=array[i];
-             }
-            return sum;
+            consumer.accept(port);
+
+            return port.output;
         });
+    }
+    static class IO_Port {
+        public int[] array;
+        public int leftIndex, rightIndex;
+        public long output;
+
+        public IO_Port(int[] array, int leftIndex, int rightIndex) {
+            this.array = array;
+            this.leftIndex = leftIndex;
+            this.rightIndex = rightIndex;
+        }
+
     }
 }
